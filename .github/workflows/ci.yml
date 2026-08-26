@@ -1,0 +1,97 @@
+name: Continuous Integration (CI) Pipeline
+
+# =============================================================================
+# GitHub Actions CI Workflow
+# Project: Akıllı Servis Masası ve Sistem Uzmanı Chatbot (PRJIC20260201)
+# Description:
+#     Automated linting, code quality verification, pgvector database integration,
+#     and full pytest test suite execution across all modules.
+# =============================================================================
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-lint:
+    name: Build, Lint & Automated Tests
+    runs-on: ubuntu-latest
+
+    services:
+      # PostgreSQL 16 with pgvector extension enabled for vector similarity testing
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: it_support_test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # -----------------------------------------------------------------------
+      # Step 1: Check out repository source code
+      # -----------------------------------------------------------------------
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # -----------------------------------------------------------------------
+      # Step 2: Set up Python 3.11 runtime environment
+      # -----------------------------------------------------------------------
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # -----------------------------------------------------------------------
+      # Step 3: Install dependencies (CPU PyTorch + requirements + dev tools)
+      # -----------------------------------------------------------------------
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install flake8 black pytest pytest-asyncio
+
+      # -----------------------------------------------------------------------
+      # Step 4: Code quality check & critical syntax linting
+      # -----------------------------------------------------------------------
+      - name: Lint with Flake8 (Syntax errors & undefined names)
+        run: |
+          # Stop the build if there are Python syntax errors or undefined names
+          flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Warning check for complexity and line formatting
+          flake8 src tests --count --exit-zero --max-complexity=15 --max-line-length=127 --statistics
+
+      # -----------------------------------------------------------------------
+      # Step 5 & 6: Execute Full Pytest Test Suite with pgvector DB
+      # -----------------------------------------------------------------------
+      - name: Run Pytest Test Suite
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: it_support_test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/it_support_test_db
+          JWT_SECRET_KEY: ci-test-jwt-secret-key-32-chars-long
+          OPENAI_API_KEY: mock-or-test-key
+          CONFIDENCE_THRESHOLD: 0.25
+          PYTHONPATH: .
+        run: |
+          pytest tests/ -v

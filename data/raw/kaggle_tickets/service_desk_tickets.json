@@ -1,0 +1,82 @@
+[
+  {
+    "ticket_id": "TCK-2026-001",
+    "category": "Authentication",
+    "priority": "High",
+    "subject": "VPN Girişinde 'Certificate Validation Failed' Hatası",
+    "description": "Kullanıcı şirket ağına FortiClient VPN üzerinden bağlanmaya çalıştığında 'Certificate Validation Failed' uyarısı alıyor ve bağlantı %98'de kesiliyor.",
+    "resolution": "1. Kullanıcı bilgisayarında `certmgr.msc` çalıştırıldı.\n2. 'Trusted Root Certification Authorities' altında süresi dolmuş kurumsal kök sertifika silindi.\n3. Yeni CA sertifikası iç portal üzerinden indirilip yeniden yüklendi.\n4. VPN servisi yeniden başlatılarak bağlantı başarıyla kuruldu."
+  },
+  {
+    "ticket_id": "TCK-2026-002",
+    "category": "Account Management",
+    "priority": "Medium",
+    "subject": "Active Directory Hesap Kilidi ve Şifre Sıfırlama",
+    "description": "Kullanıcı sabah giriş yaparken 3 kez hatalı şifre girdiği için hesabı kilitlendi (Account is locked out).",
+    "resolution": "1. Active Directory Users and Computers konsolunda kullanıcı bulundu.\n2. 'Account is locked out' kutucuğunun işareti kaldırılarak hesap kilidi açıldı.\n3. Geçici bir parola tanımlandı ve 'User must change password at next logon' seçeneği işaretlendi."
+  },
+  {
+    "ticket_id": "TCK-2026-003",
+    "category": "Print Services",
+    "priority": "Low",
+    "subject": "Yazıcı Kuyruğunda Belge Kilitlenmesi (Spooler Error)",
+    "description": "Muhasebe departmanı yazıcısına gönderilen 100 sayfalık PDF belgesi takıldı ve arkasından gelen hiçbir yazdırma görevi çalışmıyor.",
+    "resolution": "1. Yönetici olarak komut satırı açıldı.\n2. `net stop spooler` komutu ile yazdırma servisi durduruldu.\n3. `C:\\Windows\\System32\\spool\\PRINTERS` dizini altındaki tüm `.SPL` ve `.SHD` dosyaları temizlendi.\n4. `net start spooler` komutuyla servis tekrar başlatıldı ve test sayfası yazdırıldı."
+  },
+  {
+    "ticket_id": "TCK-2026-004",
+    "category": "Email & Collaboration",
+    "priority": "Medium",
+    "subject": "Outlook 'Disconnected' Durumunda Kalıyor ve Senkronize Olmuyor",
+    "description": "Outlook istemcisi sürekli 'Disconnected' veya 'Need Password' uyarısı veriyor, mailler gelen kutusuna düşmüyor.",
+    "resolution": "1. Windows Credential Manager (Kimlik Bilgisi Yöneticisi) açılarak Office/Outlook ile ilgili eski kimlik kayıtları silindi.\n2. Outlook güvenli modda (`outlook.exe /safe`) başlatıldı.\n3. Modern Authentication doğrulama ekranı tetiklenerek kullanıcı hesabı yeniden bağlandı."
+  },
+  {
+    "ticket_id": "TCK-2026-005",
+    "category": "Network",
+    "priority": "High",
+    "subject": "Ortak Ağ Sürücüsü (Z: Drive) Bağlantı Hatası",
+    "description": "Kullanıcı ortak ağ paylaşımına bağlanmak istediğinde 'The local device name is already in use' veya 'Network path not found' hatası alıyor.",
+    "resolution": "1. PowerShell açılarak `net use Z: /delete` çalıştırıldı.\n2. `ipconfig /flushdns` ile DNS önbelleği temizlendi.\n3. Paylaşım yolu IP yerine FQDN ile `net use Z: \\\\fileserver.corp.local\\Shared /persistent:yes` komutuyla yeniden bağlandı."
+  },
+  {
+    "ticket_id": "TCK-2026-006",
+    "category": "Hardware & Peripherals",
+    "priority": "Medium",
+    "subject": "Çift Monitör Kurulumunda İkinci Ekran Algılanmıyor",
+    "description": "Type-C docking station üzerinden bağlanan ikinci monitör 'No Signal' hatası veriyor.",
+    "resolution": "1. DisplayPort kablosu ve dock bağlantıları kontrol edildi.\n2. Intel Graphics Command Center açılarak 'Detect Displays' çalıştırıldı.\n3. Ekran kartı sürücüsü aygıt yöneticisinden güncellendi."
+  },
+  {
+    "ticket_id": "TCK-2026-007",
+    "category": "Software License",
+    "priority": "High",
+    "subject": "Kurumsal Yazılım Lisans Sunucusu Bağlantı Hatası (FLEXlm Error -15)",
+    "description": "Mühendislik yazılımı açılırken 'Cannot connect to license server system (FLEXlm -15,10)' hatası veriyor.",
+    "resolution": "1. `telnet lic-server.corp.local 27000` ile lisans portu kontrol edildi ve firewall kuralı eklendi.\n2. İstemci üzerindeki `ADSKFLEX_LICENSE_FILE` ortam değişkeni güncellendi."
+  },
+  {
+    "ticket_id": "TCK-2026-008",
+    "category": "Security",
+    "priority": "Critical",
+    "subject": "BitLocker Kurtarma Anahtarı (Recovery Key) Talebi",
+    "description": "Kullanıcı BIOS güncellemesi sonrası mavi ekranda BitLocker Recovery Key istemiyle karşılaştı.",
+    "resolution": "1. Active Directory veya Azure AD / Intune portalı üzerinden bilgisayar adına ait 48 haneli BitLocker Recovery Password çekildi.\n2. Kullanıcıya iletilerek disk kilidi açıldı ve TPM çipi doğrulandı."
+  },
+  {
+    "ticket_id": "TCK-2026-009",
+    "category": "Storage",
+    "priority": "Medium",
+    "subject": "C: Sürücüsü Doldu - Sistem Güncellemesi Yapılamıyor",
+    "description": "Kullanıcı bilgisayarında C: sürücüsünde 200 MB boş alan kaldığı için Windows güncellemeleri başarısız oluyor.",
+    "resolution": "1. `cleanmgr.exe /verylowdisk` ile Windows Temp ve eski güncelleme dosyaları temizlendi.\n2. `C:\\Windows\\SoftwareDistribution\\Download` klasörü boşaltıldı.\n3. 18 GB disk alanı kazandırıldı."
+  },
+  {
+    "ticket_id": "TCK-2026-010",
+    "category": "Remote Desktop",
+    "priority": "High",
+    "subject": "RDP 'An authentication error has occurred (CredSSP)' Hatası",
+    "description": "Uzak masaüstü sunucusuna bağlanırken CredSSP Encryption Oracle Remediation hatası alınıyor.",
+    "resolution": "1. Sunucu ve istemcide en güncel Windows Cumulative Update yüklendi.\n2. İstemcide `gpedit.msc` -> Administrative Templates -> System -> Credentials Delegation altındaki CredSSP politikası güncellendi."
+  }
+]
